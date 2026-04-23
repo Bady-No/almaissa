@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-display: "Montserrat", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-special: "Cinzel", serif;
+  
+  --color-beige: #F5F2ED;
+  --color-cream: #FFFDF9;
+  --color-bordeaux: #4A0E0E;
+  --color-gold: #D4AF37;
+  --color-matte-black: #0A0A0A;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-bordeaux font-sans antialiased selection:bg-gold selection:text-white;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-bordeaux tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-cream/40 backdrop-blur-md border border-bordeaux/5;
+  }
+  
+  .gold-glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+  }
+  
+  .champagne-gradient {
+    background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.08), transparent),
+                radial-gradient(circle at bottom left, rgba(74, 14, 14, 0.04), transparent);
+  }
+  
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F2ED;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E5E2DD;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}

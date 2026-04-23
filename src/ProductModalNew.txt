@@ -1,0 +1,568 @@
+const ProductModal = ({ abaya, allAbayas, viewHistory, isOpen, onClose, onAddToCart, onSelectAbaya }: {
+  abaya: Abaya,
+  allAbayas: Abaya[],
+  viewHistory: number[],
+  isOpen: boolean,
+  onClose: () => void,
+  onAddToCart: (item: CartItem) => void,
+  onSelectAbaya: (abaya: Abaya) => void,
+  key?: React.Key
+}) => {
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const productImages = abaya.images || [abaya.image];
+
+  useEffect(() => {
+    setSelectedSize(null);
+    setQuantity(1);
+    setCurrentImageIndex(0);
+    setIsWhatsAppModalOpen(false);
+    setAddedToCart(false);
+    setIsWishlisted(false);
+  }, [abaya.id]);
+
+  const nextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+  };
+
+  const prevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+  };
+
+  const handleAddToCart = () => {
+    onAddToCart({
+      cartId: `${abaya.id}-${selectedSize || 'no-size'}`,
+      id: abaya.id,
+      name: abaya.name,
+      price: abaya.price,
+      image: abaya.image,
+      size: selectedSize || undefined,
+      quantity: quantity
+    });
+    onClose();
+  };
+
+  const handleAddToCartAnimated = () => {
+    setAddedToCart(true);
+    setTimeout(() => {
+      handleAddToCart();
+    }, 900);
+  };
+
+  const handleWhatsAppOrder = () => setIsWhatsAppModalOpen(true);
+
+  const confirmWhatsAppOrder = (customerInfo: CustomerInfo) => {
+    const message = `Hello Al Maissa Label, I would like to order:\n---\nProduct: ${abaya.name}\nCollection: ${abaya.collection}\n${selectedSize ? `Size: ${selectedSize}` : 'Size: Not specified'}\nQuantity: ${quantity}\nPrice: ${abaya.price}\n---\nCustomer Details:\nName: ${customerInfo.name}\nPhone: ${customerInfo.phone}\nCity: ${customerInfo.city}\nAddress: ${customerInfo.address}`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/491626126283?text=${encodedMessage}`, '_blank');
+    setIsWhatsAppModalOpen(false);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `Al Maissa Label — ${abaya.name}`,
+      text: `Discover the ${abaya.name} from Al Maissa Label's ${abaya.collection}.`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else { await navigator.clipboard.writeText(window.location.href); alert('Link copied!'); }
+    } catch (err) { console.error(err); }
+  };
+
+  const suggestions = allAbayas
+    .filter(a => a.id !== abaya.id)
+    .sort((a, b) => {
+      if (a.collection === abaya.collection && b.collection !== abaya.collection) return -1;
+      if (a.collection !== abaya.collection && b.collection === abaya.collection) return 1;
+      const aH = viewHistory.indexOf(a.id), bH = viewHistory.indexOf(b.id);
+      if (aH !== -1 && bH === -1) return -1;
+      if (aH === -1 && bH !== -1) return 1;
+      if (aH !== -1 && bH !== -1) return aH - bH;
+      return 0;
+    })
+    .slice(0, 4);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
+          {/* Cinematic Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-matte-black/82 backdrop-blur-2xl"
+          />
+
+          {/* ═══ MAIN MODAL ═══ */}
+          <motion.div
+            initial={{ opacity: 0, y: 48, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 28, scale: 0.97 }}
+            transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full max-w-[1080px] flex flex-col bg-cream overflow-hidden"
+            style={{
+              borderRadius: '2px',
+              maxHeight: 'calc(100dvh - 20px)',
+              boxShadow: '0 40px 130px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,14,14,0.08)'
+            }}
+          >
+            {/* Film grain texture */}
+            <div
+              className="absolute inset-0 pointer-events-none z-0 opacity-[0.018]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'repeat',
+                backgroundSize: '150px'
+              }}
+            />
+
+            {/* ─── TOP BRAND BAR ─── */}
+            <div className="relative z-20 flex items-center justify-between px-5 md:px-8 py-3 border-b border-bordeaux/8 bg-cream shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="text-[7px] md:text-[8px] uppercase tracking-[0.55em] text-gold font-bold font-display">Al Maissa</span>
+                <span className="w-[3px] h-[3px] rounded-full bg-bordeaux/20" />
+                <span className="hidden sm:block text-[7px] uppercase tracking-[0.35em] text-bordeaux/40 font-display">{abaya.collection}</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-3">
+                {/* Wishlist */}
+                <button
+                  onClick={() => setIsWishlisted(v => !v)}
+                  className="flex items-center gap-1.5 text-bordeaux/40 hover:text-bordeaux transition-colors px-2 py-2 group/wish"
+                >
+                  <motion.div animate={isWishlisted ? { scale: [1, 1.5, 1] } : {}} transition={{ duration: 0.35 }}>
+                    <Heart
+                      size={15}
+                      strokeWidth={1.5}
+                      className={`transition-all ${isWishlisted ? 'fill-bordeaux text-bordeaux' : 'group-hover/wish:scale-110'}`}
+                    />
+                  </motion.div>
+                  <span className="hidden md:block text-[7px] uppercase tracking-[0.25em] font-display">Save</span>
+                </button>
+                {/* Share */}
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 text-bordeaux/40 hover:text-bordeaux transition-colors px-2 py-2"
+                >
+                  <Share2 size={15} strokeWidth={1.5} />
+                  <span className="hidden md:block text-[7px] uppercase tracking-[0.25em] font-display">Share</span>
+                </button>
+                <div className="w-px h-4 bg-bordeaux/12 mx-1" />
+                {/* Close */}
+                <button
+                  onClick={onClose}
+                  className="w-8 h-8 flex items-center justify-center text-bordeaux/40 hover:text-bordeaux transition-all hover:rotate-90 duration-300"
+                >
+                  <X size={18} strokeWidth={1.5} />
+                </button>
+              </div>
+            </div>
+
+            {/* ─── SCROLLABLE BODY ─── */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+
+              {/* ══ SPLIT LAYOUT ══ */}
+              <div className="flex flex-col md:flex-row">
+
+                {/* ── LEFT: Image Gallery ── */}
+                <div className="md:w-[52%] flex md:flex-row shrink-0" style={{ minHeight: '300px' }}>
+
+                  {/* Thumbnail strip — desktop */}
+                  <div
+                    className="hidden md:flex flex-col gap-1.5 p-2 bg-beige/70 border-r border-bordeaux/8 overflow-y-auto shrink-0"
+                    style={{ width: '66px' }}
+                  >
+                    {productImages.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentImageIndex(i)}
+                        className="relative shrink-0 overflow-hidden"
+                        style={{ aspectRatio: '3/4', borderRadius: '1px' }}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        {/* Active indicator */}
+                        <motion.div
+                          animate={{ opacity: currentImageIndex === i ? 1 : 0 }}
+                          className="absolute inset-0 border-[2px] border-bordeaux"
+                        />
+                        {/* Inactive overlay */}
+                        {currentImageIndex !== i && (
+                          <div className="absolute inset-0 bg-white/45 hover:bg-white/20 transition-colors" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Main Image */}
+                  <div className="flex-1 relative overflow-hidden group/mainimg" style={{ maxHeight: '580px' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentImageIndex}
+                        src={productImages[currentImageIndex]}
+                        alt={`${abaya.name} — ${currentImageIndex + 1}`}
+                        initial={{ opacity: 0, scale: 1.04 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.97 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-full h-full object-cover object-top transition-transform duration-[3.5s] ease-out group-hover/mainimg:scale-[1.05]"
+                        style={{ minHeight: '300px', maxHeight: '580px' }}
+                      />
+                    </AnimatePresence>
+
+                    {/* Bottom vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-matte-black/38 via-transparent to-transparent pointer-events-none" />
+
+                    {/* Prev / Next */}
+                    {productImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={prevImage}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/14 backdrop-blur-md border border-white/22 flex items-center justify-center text-white hover:bg-white/32 transition-all opacity-0 group-hover/mainimg:opacity-100 duration-300"
+                        >
+                          <ChevronLeft size={17} />
+                        </button>
+                        <button
+                          onClick={nextImage}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/14 backdrop-blur-md border border-white/22 flex items-center justify-center text-white hover:bg-white/32 transition-all opacity-0 group-hover/mainimg:opacity-100 duration-300"
+                        >
+                          <ChevronRight size={17} />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Collection badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="px-3 py-1.5 bg-bordeaux text-white text-[7px] uppercase tracking-[0.45em] font-display font-bold">
+                        {abaya.collection}
+                      </span>
+                    </div>
+
+                    {/* Mobile dot nav */}
+                    {productImages.length > 1 && (
+                      <div className="md:hidden absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {productImages.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentImageIndex(i)}
+                            className={`rounded-full transition-all duration-300 ${
+                              currentImageIndex === i ? 'w-5 h-[5px] bg-white' : 'w-[5px] h-[5px] bg-white/45'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Image counter */}
+                    <div className="hidden md:block absolute bottom-4 right-4 z-10">
+                      <span className="text-[8px] text-white/55 font-display tracking-widest tabular-nums">
+                        {String(currentImageIndex + 1).padStart(2, '0')} / {String(productImages.length).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── RIGHT: Details Panel ── */}
+                <div className="md:w-[48%] flex flex-col px-7 md:px-10 py-8 md:py-10 gap-5">
+
+                  {/* ① Brand + Name */}
+                  <div>
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.08 }}
+                      className="flex items-center gap-3 mb-3"
+                    >
+                      <div className="h-px w-5 bg-gold/60" />
+                      <span className="text-[7px] uppercase tracking-[0.65em] text-gold font-bold font-display">
+                        {abaya.collection}
+                      </span>
+                    </motion.div>
+
+                    <motion.h2
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.13 }}
+                      className="font-serif text-bordeaux leading-[1.18] mb-4"
+                      style={{ fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', fontStyle: 'italic' }}
+                    >
+                      {abaya.name}
+                    </motion.h2>
+
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ delay: 0.22, duration: 0.7 }}
+                      className="h-px origin-left"
+                      style={{ background: 'linear-gradient(to right, rgba(212,175,55,0.5), transparent)' }}
+                    />
+                  </div>
+
+                  {/* ② Price */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.18 }}
+                    className="flex items-baseline gap-4 flex-wrap"
+                  >
+                    <span className="font-serif text-bordeaux" style={{ fontSize: '1.8rem', letterSpacing: '-0.01em' }}>
+                      {abaya.price}
+                    </span>
+                    {quantity > 1 && (
+                      <span className="text-xs text-bordeaux/40 font-display">
+                        × {quantity}
+                      </span>
+                    )}
+                    <span
+                      className="ml-auto text-[7px] uppercase tracking-[0.3em] text-gold font-display font-bold px-2.5 py-1 border border-gold/28"
+                      style={{ background: 'rgba(212,175,55,0.07)' }}
+                    >
+                      Free Delivery
+                    </span>
+                  </motion.div>
+
+                  {/* ③ Description */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.22 }}
+                    className="text-[12.5px] text-bordeaux/62 leading-[1.95] font-serif"
+                    style={{ fontStyle: 'italic' }}
+                  >
+                    {abaya.description || 'Handcrafted with the finest materials, this piece embodies the essence of Al Maissa Label\'s commitment to luxury and modest elegance.'}
+                  </motion.p>
+
+                  <div className="h-px bg-bordeaux/7" />
+
+                  {/* ④ Size Selector */}
+                  {abaya.sizes && abaya.sizes.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.27 }}
+                    >
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="text-[8px] uppercase tracking-[0.45em] text-bordeaux/50 font-display font-bold">
+                          Select Size
+                        </span>
+                        <button className="text-[8px] uppercase tracking-[0.2em] text-gold font-display underline underline-offset-2 hover:text-bordeaux transition-colors">
+                          Size Guide
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2.5">
+                        {abaya.sizes.map(size => (
+                          <motion.button
+                            key={size}
+                            onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                            whileTap={{ scale: 0.93 }}
+                            className={`relative px-4 py-3 text-[9px] uppercase tracking-[0.25em] font-display font-bold border transition-all duration-300 flex items-center gap-2 ${
+                              selectedSize === size
+                                ? 'bg-bordeaux text-white border-bordeaux'
+                                : 'bg-transparent text-bordeaux border-bordeaux/20 hover:border-bordeaux/55'
+                            }`}
+                            style={selectedSize === size ? { boxShadow: '0 6px 22px rgba(74,14,14,0.22)' } : {}}
+                          >
+                            {size}
+                            {selectedSize === size && (
+                              <motion.span
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="w-3.5 h-3.5 rounded-full bg-white/22 flex items-center justify-center"
+                              >
+                                <Check size={8} />
+                              </motion.span>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* ⑤ Quantity */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.32 }}
+                    className="flex items-center gap-5"
+                  >
+                    <span className="text-[8px] uppercase tracking-[0.45em] text-bordeaux/50 font-display font-bold">Qty</span>
+                    <div className="flex items-center border border-bordeaux/15">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 flex items-center justify-center text-bordeaux/60 hover:text-bordeaux hover:bg-bordeaux/5 transition-all border-r border-bordeaux/15 text-xl font-light"
+                      >
+                        −
+                      </button>
+                      <span className="w-11 text-center text-sm font-display text-bordeaux font-semibold tabular-nums">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-10 h-10 flex items-center justify-center text-bordeaux/60 hover:text-bordeaux hover:bg-bordeaux/5 transition-all border-l border-bordeaux/15 text-xl font-light"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </motion.div>
+
+                  {/* ⑥ CTA Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.38 }}
+                    className="space-y-3"
+                  >
+                    {/* Primary — Add to Bag */}
+                    <button
+                      onClick={handleAddToCartAnimated}
+                      className="w-full py-[1.1rem] relative overflow-hidden group/ctabag bg-bordeaux text-white uppercase text-[9px] tracking-[0.52em] font-display font-bold flex items-center justify-center gap-3 transition-colors duration-700 hover:bg-matte-black"
+                    >
+                      <AnimatePresence mode="wait">
+                        {addedToCart ? (
+                          <motion.span
+                            key="added"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className="flex items-center gap-2"
+                          >
+                            <Check size={13} strokeWidth={2.5} />
+                            Added to Bag
+                          </motion.span>
+                        ) : (
+                          <motion.span
+                            key="add"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className="flex items-center gap-3"
+                          >
+                            <ShoppingBag size={13} strokeWidth={2} />
+                            Add to Bag
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                      {/* shimmer */}
+                      <span className="absolute inset-0 -translate-x-full group-hover/ctabag:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1.1s]" />
+                    </button>
+
+                    {/* Secondary — WhatsApp */}
+                    <button
+                      onClick={handleWhatsAppOrder}
+                      className="w-full py-4 border border-bordeaux/25 text-bordeaux uppercase text-[9px] tracking-[0.42em] font-display font-bold hover:bg-bordeaux hover:text-white hover:border-bordeaux transition-all duration-500 flex items-center justify-center gap-3 group/ctawa"
+                    >
+                      <MessageCircle size={13} strokeWidth={1.5} className="group-hover/ctawa:scale-110 transition-transform" />
+                      Order via WhatsApp
+                    </button>
+                  </motion.div>
+
+                  {/* ⑦ Trust Strip */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.44 }}
+                    className="grid grid-cols-3 gap-2 py-4 border-y border-bordeaux/8"
+                  >
+                    {[
+                      { icon: <ShieldCheck size={13} strokeWidth={1.5} />, top: 'Secure', btm: 'Payment' },
+                      { icon: <Check size={13} strokeWidth={2.2} />, top: 'Handcrafted', btm: 'Quality' },
+                      { icon: <MessageCircle size={13} strokeWidth={1.5} />, top: 'Direct', btm: 'From Label' },
+                    ].map(item => (
+                      <div key={item.top} className="flex flex-col items-center gap-1.5 text-center">
+                        <div className="w-7 h-7 rounded-full border border-bordeaux/12 flex items-center justify-center text-gold">
+                          {item.icon}
+                        </div>
+                        <p className="text-[7px] uppercase tracking-[0.22em] font-display font-bold text-bordeaux leading-none">{item.top}</p>
+                        <p className="text-[6px] uppercase tracking-wider text-bordeaux/35 font-display leading-none">{item.btm}</p>
+                      </div>
+                    ))}
+                  </motion.div>
+
+                  {/* ⑧ Payment Methods */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <p className="text-[7px] uppercase tracking-[0.42em] text-bordeaux/35 font-display mb-2.5">
+                      Accepted Payments
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      {[
+                        { icon: <CreditCard size={12} />, label: 'Bank Transfer' },
+                        { icon: <Wallet size={12} />, label: 'PayPal' },
+                      ].map(m => (
+                        <div
+                          key={m.label}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-white border border-bordeaux/8"
+                        >
+                          <span className="text-bordeaux/40">{m.icon}</span>
+                          <span className="text-[7px] uppercase tracking-wider font-display text-bordeaux/50 font-bold">{m.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* ── YOU MAY ALSO LOVE ── */}
+              <div className="border-t border-bordeaux/10 bg-beige/45 px-7 md:px-10 py-7">
+                <div className="flex items-center gap-5 mb-5">
+                  <div className="h-px bg-bordeaux/10 flex-1" />
+                  <span className="text-[7px] uppercase tracking-[0.65em] text-bordeaux/35 font-display font-bold whitespace-nowrap">
+                    You May Also Love
+                  </span>
+                  <div className="h-px bg-bordeaux/10 flex-1" />
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {suggestions.map((s, i) => (
+                    <motion.button
+                      key={s.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.07 * i }}
+                      onClick={() => onSelectAbaya(s)}
+                      className="group/sug text-left"
+                    >
+                      <div className="aspect-[3/4] overflow-hidden mb-2 relative" style={{ borderRadius: '1px' }}>
+                        <img
+                          src={s.image}
+                          alt={s.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover/sug:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-bordeaux/0 group-hover/sug:bg-bordeaux/10 transition-colors duration-500" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/sug:opacity-100 transition-opacity duration-300">
+                          <span className="text-[7px] uppercase tracking-[0.3em] text-white font-display font-bold bg-bordeaux/65 px-2 py-1 backdrop-blur-sm">
+                            View
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-[8px] font-serif text-bordeaux leading-tight group-hover/sug:text-gold transition-colors duration-300 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-[7px] text-gold font-display mt-0.5">{s.price}</p>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      <WhatsAppOrderModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        onConfirm={confirmWhatsAppOrder}
+        orderDetails={`${abaya.name} (${selectedSize}) x ${quantity}`}
+      />
+    </AnimatePresence>
+  );
+};
