@@ -37,6 +37,7 @@ interface Abaya {
   images?: string[];
   description?: string;
   sizes?: string[];
+  status?: 'new arrival' | 'limited edition' | 'sold out' | string;
 }
 
 interface CartItem {
@@ -250,6 +251,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/abaya-beige1.jpg",
       "../images/abaya-beige111.jpg"
     ],
+    status: "limited edition",
     description: "A structured piece in slate gray, evoking the strength and calmness of natural stone.",
     sizes: [" one size "]
   },
@@ -259,6 +261,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
     collection: "Jellaba",
     price: "89,99€",
     image: "../images/pic1.jpeg",
+    status: "new arrival",
     images: [
       "../images/pic1.jpeg",
       "../images/pic11.jpeg",
@@ -278,6 +281,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "./images/black11.jpeg",
       "./images/black111.jpeg"
     ],
+    status: "limited edition",
     description: "Elegant black abaya with a soft, flowy fit. Designed with subtle sleeve detailing for a refined, minimalist looka timeless essential, perfect for everyday wear or special occasions.",
     sizes: ["one size"]
   },
@@ -292,6 +296,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/pic22.jpeg",
       "../images/pic222.jpeg"
     ],
+    status: "new arrival",
     description: "Timeless and refined. This soft sage-toned jellaba with delicate cream details features a flowy silhouette and lightweight fabric for an effortlessly elegant look.Perfect for both everyday wear and special occasions ",
     sizes: ["S / M", "M / L"]
   },
@@ -306,6 +311,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/red11.jpeg",
       "../images/red111.jpeg"
     ],
+    status: "limited edition",
     description: "Elegant burgundy abaya with a soft, flowy fit. Designed with subtle sleeve detailing for a refined, minimalist lookour signature colour, perfect for everyday wear or special occasions",
     sizes: ["one size"]
   },
@@ -320,6 +326,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/brown11.jpeg",
       "../images/brown111.jpeg"
     ],
+    status: "sold out",
     description: "Elegant burgundy abaya with a soft, flowy fit. Designed with subtle sleeve detailing for a refined, minimalist lookour signature colour, perfect for everyday wear or special occasions",
     sizes: ["one size"]
   },
@@ -334,6 +341,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/pic33.jpeg",
       "../images/pic333.jpeg"
     ],
+    status: "new arrival",
     description: "Bold and elegant. This black jellaba with warm sunset-toned details features a flowy silhouette and lightweight fabric for a striking, refined look.Perfect for both everyday wear and special occasions ",
     sizes: ["S / M", "M / L"]
   },
@@ -348,6 +356,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/pic44.jpeg",
       "../images/pic444.jpeg"
     ],
+    status: "new arrival",
     description: "A bold expression of elegance. This deep burgundy jellaba with soft rose details features a flowy silhouette and lightweight fabric for a luxurious, feminine look.Perfect for both everyday wear and special occasions.",
     sizes: ["S / M", "M / L"]
   },
@@ -571,7 +580,7 @@ const Hero = ({ onViewChange }: { onViewChange: (view: string) => void }) => {
           style={{ opacity }}
         >
           <span className="text-[10px] md:text-xs uppercase tracking-[0.5em] font-display text-gold mb-6 block">
-            Couture test
+            Couture Modesty
           </span>
           <h1 className="text-5xl md:text-8xl font-sans font-bold mb-8 leading-[1.1] tracking-tight text-white">
             Al Maissa <span className="text-bordeaux">Label</span>
@@ -1033,11 +1042,26 @@ const ProductModal = ({ abaya, allAbayas, viewHistory, isOpen, onClose, onAddToC
                   >
                     {/* Primary — Add to Bag */}
                     <button
-                      onClick={handleAddToCartAnimated}
-                      className="w-full py-[1.1rem] relative overflow-hidden group/ctabag bg-bordeaux text-white uppercase text-[9px] tracking-[0.52em] font-display font-bold flex items-center justify-center gap-3 transition-colors duration-700 hover:bg-matte-black"
+                      disabled={abaya.status === 'sold out'}
+                      onClick={abaya.status === 'sold out' ? undefined : handleAddToCartAnimated}
+                      className={`w-full py-[1.1rem] relative overflow-hidden flex items-center justify-center gap-3 uppercase text-[9px] tracking-[0.52em] font-display font-bold transition-colors duration-700 ${
+                        abaya.status === 'sold out'
+                          ? 'bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed'
+                          : 'group/ctabag bg-bordeaux text-white hover:bg-matte-black'
+                      }`}
                     >
                       <AnimatePresence mode="wait">
-                        {addedToCart ? (
+                        {abaya.status === 'sold out' ? (
+                          <motion.span
+                            key="soldout"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className="flex items-center gap-2"
+                          >
+                            Out of Stock
+                          </motion.span>
+                        ) : addedToCart ? (
                           <motion.span
                             key="added"
                             initial={{ opacity: 0, y: 8 }}
@@ -1061,17 +1085,28 @@ const ProductModal = ({ abaya, allAbayas, viewHistory, isOpen, onClose, onAddToC
                           </motion.span>
                         )}
                       </AnimatePresence>
-                      {/* shimmer */}
-                      <span className="absolute inset-0 -translate-x-full group-hover/ctabag:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1.1s]" />
+                      {/* shimmer — only when active */}
+                      {abaya.status !== 'sold out' && (
+                        <span className="absolute inset-0 -translate-x-full group-hover/ctabag:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-[1.1s]" />
+                      )}
                     </button>
 
                     {/* Secondary — WhatsApp */}
                     <button
-                      onClick={handleWhatsAppOrder}
-                      className="w-full py-4 border border-bordeaux/25 text-bordeaux uppercase text-[9px] tracking-[0.42em] font-display font-bold hover:bg-bordeaux hover:text-white hover:border-bordeaux transition-all duration-500 flex items-center justify-center gap-3 group/ctawa"
+                      disabled={abaya.status === 'sold out'}
+                      onClick={abaya.status === 'sold out' ? undefined : handleWhatsAppOrder}
+                      className={`w-full py-4 border uppercase text-[9px] tracking-[0.42em] font-display font-bold flex items-center justify-center gap-3 transition-all duration-500 ${
+                        abaya.status === 'sold out'
+                          ? 'border-gray-300 text-gray-400 opacity-50 cursor-not-allowed'
+                          : 'group/ctawa border-bordeaux/25 text-bordeaux hover:bg-bordeaux hover:text-white hover:border-bordeaux'
+                      }`}
                     >
-                      <MessageCircle size={13} strokeWidth={1.5} className="group-hover/ctawa:scale-110 transition-transform" />
-                      Order via WhatsApp
+                      <MessageCircle
+                        size={13}
+                        strokeWidth={1.5}
+                        className={abaya.status !== 'sold out' ? 'group-hover/ctawa:scale-110 transition-transform' : ''}
+                      />
+                      {abaya.status === 'sold out' ? 'Out of Stock' : 'Order via WhatsApp'}
                     </button>
                   </motion.div>
 
@@ -1223,11 +1258,19 @@ const ProductCard = ({ abaya, onAddToCart, onOpenModal }: { abaya: Abaya, onAddT
     >
       <div className="aspect-[3/4] overflow-hidden bg-cream relative rounded-sm shadow-sm group-hover:shadow-2xl transition-all duration-1000">
         {/* Floating Badge */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-[8px] uppercase tracking-[0.2em] font-display text-bordeaux font-bold rounded-full border border-bordeaux/5">
-            {abaya.id % 2 === 0 ? 'New Arrival' : 'Limited Edition'}
-          </span>
-        </div>
+        {abaya.status && (
+          <div className="absolute top-4 left-4 z-10">
+            <span
+              className={`px-3 py-1 backdrop-blur-md text-[8px] uppercase tracking-[0.2em] font-display font-bold rounded-full border ${
+                abaya.status === 'sold out'
+                  ? 'bg-red-600 text-white border-red-800/40 animate-pulse shadow-[0_0_12px_rgba(220,38,38,0.5)]'
+                  : 'bg-white/90 text-bordeaux border-bordeaux/5'
+              }`}
+            >
+              {abaya.status}
+            </span>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           <motion.img
@@ -1238,7 +1281,9 @@ const ProductCard = ({ abaya, onAddToCart, onOpenModal }: { abaya: Abaya, onAddT
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-110"
+            className={`w-full h-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-110 ${
+              abaya.status === 'sold out' ? 'grayscale opacity-50' : ''
+            }`}
             referrerPolicy="no-referrer"
           />
         </AnimatePresence>
@@ -1296,13 +1341,18 @@ const ProductCard = ({ abaya, onAddToCart, onOpenModal }: { abaya: Abaya, onAddT
                 {!showQuickAdd ? (
                   <div className="flex flex-col">
                     <button
+                      disabled={abaya.status === 'sold out'}
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowQuickAdd(true);
                       }}
-                      className="w-full py-4 text-bordeaux uppercase text-[9px] tracking-[0.3em] font-display font-bold hover:bg-gold hover:text-white transition-all duration-500 flex items-center justify-center gap-2"
+                      className={`w-full py-4 uppercase text-[9px] tracking-[0.3em] font-display font-bold flex items-center justify-center gap-2 transition-all duration-500 ${
+                        abaya.status === 'sold out'
+                          ? 'text-red-400 opacity-50 cursor-not-allowed'
+                          : 'text-bordeaux hover:bg-gold hover:text-white'
+                      }`}
                     >
-                      <Plus size={12} /> Quick Add
+                      {abaya.status === 'sold out' ? 'Out of Stock' : <><Plus size={12} /> Quick Add</>}
                     </button>
                   </div>
                 ) : (
