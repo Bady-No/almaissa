@@ -571,7 +571,7 @@ const Hero = ({ onViewChange }: { onViewChange: (view: string) => void }) => {
           style={{ opacity }}
         >
           <span className="text-[10px] md:text-xs uppercase tracking-[0.5em] font-display text-gold mb-6 block">
-            Couture Modesty
+            Couture test
           </span>
           <h1 className="text-5xl md:text-8xl font-sans font-bold mb-8 leading-[1.1] tracking-tight text-white">
             Al Maissa <span className="text-bordeaux">Label</span>
