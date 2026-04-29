@@ -941,12 +941,12 @@ const ProductModal = ({ abaya, allAbayas, viewHistory, isOpen, onClose, onAddToC
                         × {quantity}
                       </span>
                     )}
-                    <span
+                    {/* <span
                       className="ml-auto text-[7px] uppercase tracking-[0.3em] text-gold font-display font-bold px-2.5 py-1 border border-gold/28"
                       style={{ background: 'rgba(212,175,55,0.07)' }}
                     >
                       Free Delivery
-                    </span>
+                    </span> */}
                   </motion.div>
 
                   {/* ③ Description */}
