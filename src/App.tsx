@@ -296,7 +296,7 @@ const SIGNATURE_ABAYAS: Abaya[] = [
       "../images/pic22.jpeg",
       "../images/pic222.jpeg"
     ],
-    status: "new arrival",
+    status: "sold out",
     description: "Timeless and refined. This soft sage-toned jellaba with delicate cream details features a flowy silhouette and lightweight fabric for an effortlessly elegant look.Perfect for both everyday wear and special occasions ",
     sizes: ["S / M", "M / L"]
   },
